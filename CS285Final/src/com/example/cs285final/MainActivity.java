@@ -4,12 +4,17 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -19,16 +24,26 @@ public class MainActivity extends Activity {
     ListView list;
     LinearLayout ll;
     Button loadBtn;
+    ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ll = (LinearLayout) findViewById(R.id.LinearLayout1);
 
         list = (ListView) findViewById(R.id.listView1);
+        list.setOnItemClickListener(new OnItemClickListener() {
 
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				String info = adapter.getItem(position);
+//				Intent intent = new Intent(getApplicationContext(), MessagingActivity.class).putExtra("contact_info", "info");
+//				startActivity(intent);
+			}
+		});
         loadBtn = (Button) findViewById(R.id.button1);
         loadBtn.setOnClickListener(new OnClickListener() {
 
@@ -40,6 +55,33 @@ public class MainActivity extends Activity {
             }
         });
 
+    }
+    
+    //STORAGE IS ONE STRING SEPARATING CONTACTS BY SEMICOLONS AND 
+    // INFORMATION WITHIN THE CONTACT BY COMMAS
+    public String getStorage() {
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    	//storage exists so get it
+    	if(sp.contains("storage")) {
+    		return sp.getString("storage", "");
+    	} else {//storage does not exist (AKA first time opening application)
+    		Editor edit = sp.edit();
+    		edit.putString("storage", "");
+    		edit.commit();
+    		return "";
+    	}
+	}
+    
+    //FORMAT: storage is really one string
+    // contacts are separated by semicolons
+    // within a contact, the phoneNumber is first then a comma to separate it from the key
+    public void addToStorage(String phoneNumber, String key) {
+    	String storage = getStorage();
+    	storage = storage + ";" + phoneNumber + "," + key;
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    	Editor edit = sp.edit();
+    	edit.putString("storage", storage);
+    	while(!edit.commit()) {};
     }
 
     class LoadContactsAyscn extends AsyncTask<Void, Void, ArrayList<String>> {
@@ -88,7 +130,7 @@ public class MainActivity extends Activity {
 
             ll.removeView(loadBtn);
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+            adapter = new ArrayAdapter<String>(
                     getApplicationContext(), R.layout.text, contacts);
 
             list.setAdapter(adapter);
@@ -96,5 +138,8 @@ public class MainActivity extends Activity {
         }
 
     }
+    
+    
+    
 }
  
