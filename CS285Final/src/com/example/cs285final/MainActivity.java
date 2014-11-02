@@ -1,64 +1,100 @@
 package com.example.cs285final;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.provider.ContactsContract;
 import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
+    ListView list;
+    LinearLayout ll;
+    Button loadBtn;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-		if (savedInstanceState == null) {
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
-		}
-	}
+        ll = (LinearLayout) findViewById(R.id.LinearLayout1);
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+        list = (ListView) findViewById(R.id.listView1);
 
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+        loadBtn = (Button) findViewById(R.id.button1);
+        loadBtn.setOnClickListener(new OnClickListener() {
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                LoadContactsAyscn lca = new LoadContactsAyscn();
+                lca.execute();
+            }
+        });
 
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
-	public static class PlaceholderFragment extends Fragment {
+    }
 
-		public PlaceholderFragment() {
-		}
+    class LoadContactsAyscn extends AsyncTask<Void, Void, ArrayList<String>> {
+        ProgressDialog pd;
 
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_main, container,
-					false);
-			return rootView;
-		}
-	}
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+            super.onPreExecute();
 
+            pd = ProgressDialog.show(MainActivity.this, "Loading Contacts",
+                    "Please Wait");
+        }
+
+        @Override
+        protected ArrayList<String> doInBackground(Void... params) {
+            // TODO Auto-generated method stub
+            ArrayList<String> contacts = new ArrayList<String>();
+
+            Cursor c = getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                    null, null, null);
+            while (c.moveToNext()) {
+
+                String contactName = c
+                        .getString(c
+                                .getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                String phNumber = c
+                        .getString(c
+                                .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                contacts.add(contactName + ":" + phNumber);
+
+            }
+            c.close();
+
+            return contacts;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<String> contacts) {
+            // TODO Auto-generated method stub
+            super.onPostExecute(contacts);
+
+            pd.cancel();
+
+            ll.removeView(loadBtn);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                    getApplicationContext(), R.layout.text, contacts);
+
+            list.setAdapter(adapter);
+
+        }
+
+    }
 }
+ 
