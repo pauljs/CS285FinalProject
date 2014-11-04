@@ -36,10 +36,10 @@ public class MainActivity extends Activity {
         list.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(final AdapterView<?> parent, final View view,
+					final int position, final long id) {
 				// TODO Auto-generated method stub
-				String info = adapter.getItem(position);
+				final String info = adapter.getItem(position);
 //				Intent intent = new Intent(getApplicationContext(), MessagingActivity.class).putExtra("contact_info", "info");
 //				startActivity(intent);
 			}
@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                LoadContactsAyscn lca = new LoadContactsAyscn();
+                final LoadContactsAyscn lca = new LoadContactsAyscn();
                 lca.execute();
             }
         });
@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     //STORAGE IS ONE STRING SEPARATING CONTACTS BY SEMICOLONS AND 
     // INFORMATION WITHIN THE CONTACT BY COMMAS
     public String getStorage() {
-    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    	final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
     	//storage exists so get it
     	if(sp.contains("storage")) {
     		return sp.getString("storage", "");
@@ -75,10 +75,10 @@ public class MainActivity extends Activity {
     //FORMAT: storage is really one string
     // contacts are separated by semicolons
     // within a contact, the phoneNumber is first then a comma to separate it from the key
-    public void addToStorage(String phoneNumber, String key) {
+    public void addToStorage(final String phoneNumber, final String key) {
     	String storage = getStorage();
     	storage = storage + ";" + phoneNumber + "," + key;
-    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    	final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
     	Editor edit = sp.edit();
     	edit.putString("storage", storage);
     	while(!edit.commit()) {};
@@ -99,17 +99,17 @@ public class MainActivity extends Activity {
         @Override
         protected ArrayList<String> doInBackground(Void... params) {
             // TODO Auto-generated method stub
-            ArrayList<String> contacts = new ArrayList<String>();
+            final ArrayList<String> contacts = new ArrayList<String>();
 
-            Cursor c = getContentResolver().query(
+            final Cursor c = getContentResolver().query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
                     null, null, null);
             while (c.moveToNext()) {
 
-                String contactName = c
+                final String contactName = c
                         .getString(c
                                 .getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                String phNumber = c
+                final String phNumber = c
                         .getString(c
                                 .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
