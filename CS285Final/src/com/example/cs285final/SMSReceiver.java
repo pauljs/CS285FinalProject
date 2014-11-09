@@ -1,6 +1,5 @@
 package com.example.cs285final;
 
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,30 +12,30 @@ import android.widget.Toast;
 
 public class SMSReceiver extends BroadcastReceiver {
 
- private static final String TAG = "Message recieved";
+	private static final String TAG = "Message recieved";
 
- @Override
- public void onReceive(Context context, Intent intent) {    
-     Bundle bundle = intent.getExtras();
-     Object[] pdus = (Object[]) bundle.get("pdus");
-     SmsMessage messages =SmsMessage.createFromPdu((byte[]) pdus[0]); 
-     Toast.makeText(context, "SMS Received : "+messages.getOriginatingAddress(),
-    		 Toast.LENGTH_LONG).show();
-     String sender = messages.getOriginatingAddress();
-     Map<String, String> regMap = generateMap();
+	@Override
+	public void onReceive(Context context, Intent intent) {    
+		Bundle bundle = intent.getExtras();
+		Object[] pdus = (Object[]) bundle.get("pdus");
+		SmsMessage messages =SmsMessage.createFromPdu((byte[]) pdus[0]); 
+		Toast.makeText(context, "SMS Received : "+messages.getOriginatingAddress(),
+				Toast.LENGTH_LONG).show();
+		String sender = messages.getOriginatingAddress();
+		Map<String, String> regMap = generateMap();
 
-    		 Log.i(TAG,  messages.getMessageBody());
-     if(regMap.containsKey(sender)){
-    	 String message = messages.getDisplayMessageBody();
-    	 String tag = message.substring(0, 5);
-    	 if(tag.equals("encry")){
-    		 message = message.substring(5);
-    		 String plainText = decryt(message, sender, regMap.get(sender));
-    		 sendInternal(message, sender);
-    	 }
-    	 sendInternal(message, sender);
-     }
-  }
+		Log.i(TAG,  messages.getMessageBody());
+		if(regMap.containsKey(sender)){
+			String message = messages.getDisplayMessageBody();
+			String tag = message.substring(0, 5);
+			if(tag.equals("encry")){
+				message = message.substring(5);
+				String plainText = decryt(message, sender, regMap.get(sender));
+				sendInternal(message, sender);
+			}
+			sendInternal(message, sender);
+		}
+	}
 
  /***
   * Create a Map from the shared preferences location not sure how to do this
@@ -81,5 +80,4 @@ public class SMSReceiver extends BroadcastReceiver {
 	// TODO Auto-generated method stub
 	 return null;
  }
-	
 }
