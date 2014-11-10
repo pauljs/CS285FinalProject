@@ -5,14 +5,22 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
 public class TextingView extends Activity {
 	ListView textList;
 	EditText textField;
+	EditText contactName;
+	Button sendButton;
+	ArrayAdapter<String> textAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +31,23 @@ public class TextingView extends Activity {
 		
 		textList = (ListView) findViewById(R.id.listView1);
 		textField = (EditText) findViewById(R.id.editText1);
+		contactName = (EditText) findViewById(R.id.editText2);
+		textAdapter = new ArrayAdapter<String>(getApplicationContext(),
+				R.layout.text);
+		sendButton = (Button) findViewById(R.id.button1);
+		
+		sendButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				// when press send, populate the listView with the text
+				Editable message = textField.getText();
+				textAdapter.add(message.toString());
+				textList.setAdapter(textAdapter);
+				textField.setText("");
+			}
+			
+		});
 	}
 
 	/**
