@@ -51,9 +51,14 @@ public class SMSReceiver extends BroadcastReceiver {
 		// Toast.makeText(context, "My Number: " + myPhoneNumber,
 		// Toast.LENGTH_LONG).show();
 		//
+		
+		
+	/*  INFINTE LOOOP HERE
 		SmsManager sms = SmsManager.getDefault();
 		sms.sendTextMessage(myPhoneNumber, sender, message, null, null);
-
+*/
+		
+		
 		// Map<String, String> regMap = generateMap();
 		//
 		// Log.i(TAG, messages.getMessageBody());

@@ -1,11 +1,21 @@
 package com.example.cs285final;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
 import android.text.Editable;
+import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +42,22 @@ public class TextingView extends Activity {
 		textList = (ListView) findViewById(R.id.listView1);
 		textField = (EditText) findViewById(R.id.editText1);
 		contactName = (EditText) findViewById(R.id.editText2);
+		
+		List<String> prevTexts = new ArrayList<String>();
+		prevTexts = getPrevTexts((String) getIntent().getExtras().get("contactNumber"));
+	//	ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+    //            this, 
+    //            /*not sure, need to talk to erin*/R.layout.text,
+    //            prevTexts );
 		textAdapter = new ArrayAdapter<String>(getApplicationContext(),
-				R.layout.text);
+				R.layout.text, prevTexts);
+		textList.setAdapter(textAdapter);
+		
+	
+		/*
+		 * Grabs the current texts in the content provider and populates the  
+		 */
+		
 		sendButton = (Button) findViewById(R.id.button1);
 		
 		sendButton.setOnClickListener(new OnClickListener() {
@@ -45,9 +69,57 @@ public class TextingView extends Activity {
 				textAdapter.add(message.toString());
 				textList.setAdapter(textAdapter);
 				textField.setText("");
+				
 			}
 			
 		});
+	}
+
+	private List<String> getPrevTexts(String number) {
+		ArrayList<Pair<String, Long>> result = new ArrayList<Pair<String, Long>>();
+
+		Cursor c = getContentResolver().query(
+				Uri.parse("content://sms/inbox"), null,
+				null, null, null);
+		/* while (c.moveToNext()) {
+		        for (int i = 0; i < c.getColumnCount(); i++) {
+		            Log.d(c.getColumnName(i) + "", i + " " + c.getString(i));
+		        }
+		        Log.d("One row finished",
+		                "**************************************************");
+		    }*/
+		
+		while (c.moveToNext()) {
+			if(c.getString(2).equals("7136771354")){
+				result.add(new Pair<String, Long>("7136771354: " + c.getString(12),c.getLong(4)));
+				Log.d("TEXTVIEW", c.getString(12));
+			}
+		}
+		c.close();
+		
+		Cursor d = getContentResolver().query(
+				Uri.parse("content://sms/sent"), null,
+				null, null, null);
+		
+		while (d.moveToNext()) {
+			if(d.getString(2).equals("7136771354")){
+				result.add(new Pair<String, Long>("6318852193: " + d.getString(12),d.getLong(4)));
+				Log.d("TEXTVIEW", d.getString(12));
+			}
+		}
+		Collections.sort(result, new Comparator<Pair<String, Long>>() {
+	        @Override
+	        public int compare(Pair<String, Long> p1, Pair<String, Long>  p2)
+	        {
+	            return  p1.second.compareTo(p2.second);
+	        }
+	    });
+		c.close();
+		List<String> sortedResults = new ArrayList<String>();
+		for(Pair<String, Long> p : result){
+			sortedResults.add(p.first);
+		}
+		return sortedResults;
 	}
 
 	/**
