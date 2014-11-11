@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
+import android.telephony.SmsManager;
 import android.text.Editable;
 import android.util.Log;
 import android.util.Pair;
@@ -31,6 +32,7 @@ public class TextingView extends Activity {
 	EditText contactName;
 	Button sendButton;
 	ArrayAdapter<String> textAdapter;
+	String number;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +40,15 @@ public class TextingView extends Activity {
 		setContentView(R.layout.activity_texting_view);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		
+		number = (String) getIntent().getExtras().get("number");
 		textList = (ListView) findViewById(R.id.listView1);
 		textField = (EditText) findViewById(R.id.editText1);
 		contactName = (EditText) findViewById(R.id.editText2);
 		
-		List<String> prevTexts = new ArrayList<String>();
-		prevTexts = getPrevTexts((String) getIntent().getExtras().get("contactNumber"));
-	//	ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-    //            this, 
-    //            /*not sure, need to talk to erin*/R.layout.text,
-    //            prevTexts );
-		textAdapter = new ArrayAdapter<String>(getApplicationContext(),
-				R.layout.text, prevTexts);
-		textList.setAdapter(textAdapter);
+		
+
+		
+		populatePastTexts();
 		
 	
 		/*
@@ -65,14 +62,40 @@ public class TextingView extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				// when press send, populate the listView with the text
+				
 				Editable message = textField.getText();
-				textAdapter.add(message.toString());
-				textList.setAdapter(textAdapter);
+				//textAdapter.add(message.toString());
+				//textList.setAdapter(textAdapter);
+				
 				textField.setText("");
+				EncryptAndSend(message.toString());
+				populatePastTexts();
+			}
+
+			private void EncryptAndSend(String message) {
+				/*
+				 * TODO ENCRYPTION GOES HERE
+				 */
+				message = "\"" + message + "\"";
+				SmsManager sms = SmsManager.getDefault();
+				sms.sendTextMessage(number, "6318852193", message, null, null);
 				
 			}
 			
 		});
+	}
+
+	private void populatePastTexts() {
+		List<String> prevTexts = new ArrayList<String>();
+		prevTexts = getPrevTexts((String) getIntent().getExtras().get("number"));
+	//	ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+    //            this, 
+    //            /*not sure, need to talk to erin*/R.layout.text,
+    //            prevTexts );
+		textAdapter = new ArrayAdapter<String>(getApplicationContext(),
+				R.layout.text, prevTexts);
+		textList.setAdapter(textAdapter);
+		
 	}
 
 	private List<String> getPrevTexts(String number) {
@@ -90,8 +113,13 @@ public class TextingView extends Activity {
 		    }*/
 		
 		while (c.moveToNext()) {
-			if(c.getString(2).equals("7136771354")){
-				result.add(new Pair<String, Long>("7136771354: " + c.getString(12),c.getLong(4)));
+			if(c.getString(2).equals(number)){
+				String toAdd = c.getString(12);
+				if(toAdd.charAt(0)=='\"'){
+					// TODO DECRYPT
+					toAdd = toAdd.substring(1,toAdd.length()-1);
+				}
+				result.add(new Pair<String, Long>(number + ": " + toAdd,c.getLong(4)));
 				Log.d("TEXTVIEW", c.getString(12));
 			}
 		}
@@ -102,8 +130,13 @@ public class TextingView extends Activity {
 				null, null, null);
 		
 		while (d.moveToNext()) {
-			if(d.getString(2).equals("7136771354")){
-				result.add(new Pair<String, Long>("6318852193: " + d.getString(12),d.getLong(4)));
+			if(d.getString(2).equals(number)){
+				String toAdd = d.getString(12);
+				if(toAdd.charAt(0)=='\"'){
+					//TODO DECRYPT
+					toAdd = toAdd.substring(1,toAdd.length()-1);
+				}
+				result.add(new Pair<String, Long>("6318852193: " +toAdd,d.getLong(4)));
 				Log.d("TEXTVIEW", d.getString(12));
 			}
 		}

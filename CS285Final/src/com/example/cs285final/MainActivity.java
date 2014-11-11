@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
 	public void onTextingView(View view) {
 		Intent intent = new Intent(this, TextingView.class);
 		intent.putExtra(PARENT, "test");
+		intent.putExtra("number", "7136771354");
 		//TODO: Added the contact of the person chosen
 	//	intent.putExtra("contactNumber", "");
 		startActivity(intent);
