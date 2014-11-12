@@ -35,11 +35,6 @@
             android:name="com.example.cs285final.Storage"
             android:label="@string/app_name" >
         </activity>
-
-        <activity
-            android:name="com.example.cs285final.TextingView"
-            android:label="TextingView" >
-        </activity>
         
         <!-- THIS IS THE RECIEVE THAT GETS MESSAGES!!! -->
         <receiver
@@ -54,10 +49,11 @@
         <activity
             android:name="com.example.cs285final.TextingView"
             android:label="@string/title_activity_texting_view"
-            android:parentActivityName="com.example.cs285final" >
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:parentActivityName="com.example.cs285final.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.cs285final" />
+                android:value="com.example.cs285final.MainActivity" />
         </activity>
     </application>
 
