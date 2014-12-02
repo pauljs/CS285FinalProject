@@ -55,53 +55,15 @@ import javax.crypto.interfaces.*;
 
 public class DHKeyAgreement2 {
 
-    private DHKeyAgreement2() {}
+	
+    public DHKeyAgreement2() {}
 
-    public static void main(String argv[]) {
-        try {
-            String mode = "USE_SKIP_DH_PARAMS";
-
-            DHKeyAgreement2 keyAgree = new DHKeyAgreement2();
-
-            if (argv.length > 1) {
-                keyAgree.usage();
-                throw new Exception("Wrong number of command options");
-            } else if (argv.length == 1) {
-                if (!(argv[0].equals("-gen"))) {
-                    keyAgree.usage();
-                    throw new Exception("Unrecognized flag: " + argv[0]);
-                }
-                mode = "GENERATE_DH_PARAMS";
-            }
-
-            keyAgree.run(mode);
-        } catch (Exception e) {
-            System.err.println("Error: " + e);
-            System.exit(1);
-        }
-    }
-
-    private void run(String mode) throws Exception {
-
+    public byte[] startHandshake() throws Exception {
         DHParameterSpec dhSkipParamSpec;
-
-        if (mode.equals("GENERATE_DH_PARAMS")) {
-            // Some central authority creates new DH parameters
-            System.out.println
-                ("Creating Diffie-Hellman parameters (takes VERY long) ...");
-            AlgorithmParameterGenerator paramGen
-                = AlgorithmParameterGenerator.getInstance("DH");
-            paramGen.init(512);
-            AlgorithmParameters params = paramGen.generateParameters();
-            dhSkipParamSpec = (DHParameterSpec)params.getParameterSpec
-                (DHParameterSpec.class);
-        } else {
-            // use some pre-generated, default DH parameters
-            System.out.println("Using SKIP Diffie-Hellman parameters");
-            dhSkipParamSpec = new DHParameterSpec(skip1024Modulus,
-                                                  skip1024Base);
-        }
-
+    	// use some pre-generated, default DH parameters
+        System.out.println("Using SKIP Diffie-Hellman parameters");
+        dhSkipParamSpec = new DHParameterSpec(skip1024Modulus,
+                                              skip1024Base);
         /*
          * Alice creates her own DH key pair, using the DH parameters from
          * above
@@ -115,11 +77,18 @@ public class DHKeyAgreement2 {
         System.out.println("ALICE: Initialization ...");
         KeyAgreement aliceKeyAgree = KeyAgreement.getInstance("DH");
         aliceKeyAgree.init(aliceKpair.getPrivate());
-
+        
+        /*
+         //INSERT aliceKeyAgree INTO CONTENT PROVIDER HERE
+         */
+        
         // Alice encodes her public key, and sends it over to Bob.
         byte[] alicePubKeyEnc = aliceKpair.getPublic().getEncoded();
-
-        /*
+        return alicePubKeyEnc;
+    }
+    
+    public byte[] receiveInitialHandShake(byte[] alicePubKeyEnc) throws Exception {
+    	/*
          * Let's turn over to Bob. Bob has received Alice's public key
          * in encoded format.
          * He instantiates a DH public key from the encoded key material.
@@ -147,22 +116,7 @@ public class DHKeyAgreement2 {
         KeyAgreement bobKeyAgree = KeyAgreement.getInstance("DH");
         bobKeyAgree.init(bobKpair.getPrivate());
 
-        // Bob encodes his public key, and sends it over to Alice.
-        byte[] bobPubKeyEnc = bobKpair.getPublic().getEncoded();
-
-        /*
-         * Alice uses Bob's public key for the first (and only) phase
-         * of her version of the DH
-         * protocol.
-         * Before she can do so, she has to instantiate a DH public key
-         * from Bob's encoded key material.
-         */
-        KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
-        x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
-        PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
-        System.out.println("ALICE: Execute PHASE1 ...");
-        aliceKeyAgree.doPhase(bobPubKey, true);
-
+        
         /*
          * Bob uses Alice's public key for the first (and only) phase
          * of his version of the DH
@@ -170,37 +124,41 @@ public class DHKeyAgreement2 {
          */
         System.out.println("BOB: Execute PHASE1 ...");
         bobKeyAgree.doPhase(alicePubKey, true);
-
+        
         /*
-         * At this stage, both Alice and Bob have completed the DH key
-         * agreement protocol.
-         * Both generate the (same) shared secret.
+        //INSERT bobKeyAgree INTO CONTENT PROVIDER HERE
+        */
+        
+     // Bob encodes his public key, and sends it over to Alice.
+        byte[] bobPubKeyEnc = bobKpair.getPublic().getEncoded();
+        return bobPubKeyEnc;
+    }
+    
+    public void completeHandshake(byte[] bobPubKeyEnc) throws Exception {
+    	/*
+         * Alice uses Bob's public key for the first (and only) phase
+         * of her version of the DH
+         * protocol.
+         * Before she can do so, she has to instantiate a DH public key
+         * from Bob's encoded key material.
          */
-        byte[] aliceSharedSecret = aliceKeyAgree.generateSecret();
-        int aliceLen = aliceSharedSecret.length;
-
-        byte[] bobSharedSecret = new byte[aliceLen];
-        int bobLen;
-        try {
-            // show example of what happens if you
-            // provide an output buffer that is too short
-            bobLen = bobKeyAgree.generateSecret(bobSharedSecret, 1);
-        } catch (ShortBufferException e) {
-            System.out.println(e.getMessage());
-        }
-        // provide output buffer of required size
-        bobLen = bobKeyAgree.generateSecret(bobSharedSecret, 0);
-
-        System.out.println("Alice secret: " +
-          toHexString(aliceSharedSecret));
-        System.out.println("Bob secret: " +
-          toHexString(bobSharedSecret));
-
-        if (!java.util.Arrays.equals(aliceSharedSecret, bobSharedSecret))
-            throw new Exception("Shared secrets differ");
-        System.out.println("Shared secrets are the same");
-
+        KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
+        PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
+        System.out.println("ALICE: Execute PHASE1 ...");
+        
         /*
+         //GET aliceKeyAgree FROM THE CONTENT PROVIDER HERE
+         */
+        aliceKeyAgree.doPhase(bobPubKey, true);
+        
+        /*
+         //UPDATE aliceKeyAgree INTO CONTENT PROVIDER HERE
+         */
+    }
+    
+    public byte[] encrypt(String plaintext) throws Exception {
+    	/*
          * Now let's return the shared secret as a SecretKey object
          * and use it for encryption. First, we generate SecretKeys for the
          * "DES" algorithm (based on the raw shared secret data) and
@@ -232,15 +190,14 @@ public class DHKeyAgreement2 {
         // NOTE: The call to bobKeyAgree.generateSecret above reset the key
         // agreement object, so we call doPhase again prior to another
         // generateSecret call
-        bobKeyAgree.doPhase(alicePubKey, true);
+        //bobKeyAgree.doPhase(alicePubKey, true); // not needed because done in handshake
+        
+        /*
+         //GET bobKeyAgree FROM CONTENT PROVIDER HERE
+         */
         SecretKey bobDesKey = bobKeyAgree.generateSecret("DES");
 
-        // Alice
-        // NOTE: The call to aliceKeyAgree.generateSecret above reset the key
-        // agreement object, so we call doPhase again prior to another
-        // generateSecret call
-        aliceKeyAgree.doPhase(bobPubKey, true);
-        SecretKey aliceDesKey = aliceKeyAgree.generateSecret("DES");
+        
 
         /*
          * Bob encrypts, using DES in ECB mode
@@ -248,50 +205,30 @@ public class DHKeyAgreement2 {
         Cipher bobCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey);
 
-        byte[] cleartext = "This is just an example".getBytes();
+        byte[] cleartext = plaintext.getBytes();
         byte[] ciphertext = bobCipher.doFinal(cleartext);
-
-        /*
+        return ciphertext;
+    }
+    
+    public String decrypt(byte[] ciphertext) throws Exception {
+    	// Alice
+        // NOTE: The call to aliceKeyAgree.generateSecret above reset the key
+        // agreement object, so we call doPhase again prior to another
+        // generateSecret call
+        //aliceKeyAgree.doPhase(bobPubKey, true);//not needed because done in handshake
+    	
+    	/*
+         //GET bobKeyAgree FROM CONTENT PROVIDER HERE
+    	 */
+    	
+        SecretKey aliceDesKey = aliceKeyAgree.generateSecret("DES");
+    	/*
          * Alice decrypts, using DES in ECB mode
          */
         Cipher aliceCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         aliceCipher.init(Cipher.DECRYPT_MODE, aliceDesKey);
         byte[] recovered = aliceCipher.doFinal(ciphertext);
-
-        if (!java.util.Arrays.equals(cleartext, recovered))
-            throw new Exception("DES in CBC mode recovered text is " +
-              "different from cleartext");
-        System.out.println("DES in ECB mode recovered text is " +
-            "same as cleartext");
-
-        /*
-         * Bob encrypts, using DES in CBC mode
-         */
-        bobCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
-        bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey);
-
-        cleartext = "This is just an example".getBytes();
-        ciphertext = bobCipher.doFinal(cleartext);
-        // Retrieve the parameter that was used, and transfer it to Alice in
-        // encoded format
-        byte[] encodedParams = bobCipher.getParameters().getEncoded();
-
-        /*
-         * Alice decrypts, using DES in CBC mode
-         */
-        // Instantiate AlgorithmParameters object from parameter encoding
-        // obtained from Bob
-        AlgorithmParameters params = AlgorithmParameters.getInstance("DES");
-        params.init(encodedParams);
-        aliceCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
-        aliceCipher.init(Cipher.DECRYPT_MODE, aliceDesKey, params);
-        recovered = aliceCipher.doFinal(ciphertext);
-
-        if (!java.util.Arrays.equals(cleartext, recovered))
-            throw new Exception("DES in CBC mode recovered text is " +
-              "different from cleartext");
-        System.out.println("DES in CBC mode recovered text is " +
-            "same as cleartext");
+        return new String(recovered);
     }
 
     /*
