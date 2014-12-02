@@ -57,8 +57,10 @@ public class DHKeyAgreement2 {
 
 	
     public DHKeyAgreement2() {}
+    
+    
 
-    public byte[] startHandshake() throws Exception {
+    public Transfer startHandshakePart1(String phoneNumber) throws Exception {
         DHParameterSpec dhSkipParamSpec;
     	// use some pre-generated, default DH parameters
         System.out.println("Using SKIP Diffie-Hellman parameters");
@@ -77,17 +79,21 @@ public class DHKeyAgreement2 {
         System.out.println("ALICE: Initialization ...");
         KeyAgreement aliceKeyAgree = KeyAgreement.getInstance("DH");
         aliceKeyAgree.init(aliceKpair.getPrivate());
-        
+        return new Transfer(aliceKpair, aliceKeyAgree);
+    }
+    
+    public byte[] startHandshakePart2(KeyPair aliceKpair) {
         /*
          //INSERT aliceKeyAgree INTO CONTENT PROVIDER HERE
          */
+        //the above shouldve been done in  android activity
         
         // Alice encodes her public key, and sends it over to Bob.
         byte[] alicePubKeyEnc = aliceKpair.getPublic().getEncoded();
         return alicePubKeyEnc;
     }
     
-    public byte[] receiveInitialHandShake(byte[] alicePubKeyEnc) throws Exception {
+    public Transfer receiveInitialHandShakePart1(byte[] alicePubKeyEnc) throws Exception {
     	/*
          * Let's turn over to Bob. Bob has received Alice's public key
          * in encoded format.
@@ -124,7 +130,10 @@ public class DHKeyAgreement2 {
          */
         System.out.println("BOB: Execute PHASE1 ...");
         bobKeyAgree.doPhase(alicePubKey, true);
-        
+        return new Transfer(bobKpair, bobKeyAgree);
+    }
+    
+    public byte[] receiveInitialHandShakePart2(KeyPair bobKpair) {
         /*
         //INSERT bobKeyAgree INTO CONTENT PROVIDER HERE
         */
@@ -134,7 +143,7 @@ public class DHKeyAgreement2 {
         return bobPubKeyEnc;
     }
     
-    public void completeHandshake(byte[] bobPubKeyEnc) throws Exception {
+    public KeyAgreement completeHandshake(byte[] bobPubKeyEnc, KeyAgreement aliceKeyAgree) throws Exception {
     	/*
          * Alice uses Bob's public key for the first (and only) phase
          * of her version of the DH
@@ -155,9 +164,10 @@ public class DHKeyAgreement2 {
         /*
          //UPDATE aliceKeyAgree INTO CONTENT PROVIDER HERE
          */
+        return aliceKeyAgree;
     }
     
-    public byte[] encrypt(String plaintext) throws Exception {
+    public byte[] encrypt(String plaintext, KeyAgreement bobKeyAgree) throws Exception {
     	/*
          * Now let's return the shared secret as a SecretKey object
          * and use it for encryption. First, we generate SecretKeys for the
@@ -210,7 +220,7 @@ public class DHKeyAgreement2 {
         return ciphertext;
     }
     
-    public String decrypt(byte[] ciphertext) throws Exception {
+    public String decrypt(byte[] ciphertext, KeyAgreement aliceKeyAgree) throws Exception {
     	// Alice
         // NOTE: The call to aliceKeyAgree.generateSecret above reset the key
         // agreement object, so we call doPhase again prior to another
