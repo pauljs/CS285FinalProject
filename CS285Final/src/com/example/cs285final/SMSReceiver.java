@@ -3,7 +3,11 @@ package com.example.cs285final;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.crypto.KeyAgreement;
+
 import android.content.*;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.*;
@@ -21,7 +25,36 @@ public class SMSReceiver extends BroadcastReceiver {
 
 		final Bundle bundle = intent.getExtras();
 		final Object[] pdus = (Object[]) bundle.get("pdus");
+		final SmsMessage[] messages = new SmsMessage[pdus.length];
+		final StringBuilder sb = new StringBuilder();
 
+		for (int i = 0; i < pdus.length; i++) {
+			messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+			sb.append(messages[i].getMessageBody());
+		}
+		final String sender = messages[0].getOriginatingAddress();
+		final String message = sb.toString();
+		
+		DHKeyAgreement2 cryptographyHelper = new DHKeyAgreement2();
+		try{
+			if(message.substring(0, 4).equals(MainActivity.RECIEVE_INITAL)){
+				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(message.substring(4).getBytes());
+				//TODO: DOES THIS WORK?
+				addUserKeyInfo(sender, new String(t.getAliceKeyAgree().generateSecret()), context);
+				byte[] toSend = cryptographyHelper.receiveInitialHandShakePart2(t.getAliceKpair());
+				SmsManager sms = SmsManager.getDefault();
+				sms.sendTextMessage(sender, "",MainActivity.COMPLETE_HANDSHAKE + new String(toSend), null, null);
+			} else if(message.substring(0, 4).equals(MainActivity.COMPLETE_HANDSHAKE)){
+				//TODO: THIS DOES NOT WORK
+				KeyAgreement temp = null;//KeyAgreement(getKey(sender, context).getBytes());
+				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), temp);
+			}
+		}
+		//To robust four U
+		catch (Exception e){}
+		
+		
+		/*
 		// need to create a for loop because if message is too long it will be
 		// broken up into a few messages
 		final SmsMessage[] messages = new SmsMessage[pdus.length];
@@ -51,7 +84,7 @@ public class SMSReceiver extends BroadcastReceiver {
 		// Toast.makeText(context, "My Number: " + myPhoneNumber,
 		// Toast.LENGTH_LONG).show();
 		//
-		
+		*/
 		
 	/*  INFINTE LOOOP HERE
 		SmsManager sms = SmsManager.getDefault();
@@ -110,19 +143,32 @@ public class SMSReceiver extends BroadcastReceiver {
 	 */
 	private void sendInternal(String message, String sender) {
 		// TODO Auto-generated method stub
-
 	}
+	
+	// TODO
+		public void addUserKeyInfo(String phoneNumber, String key, Context context) {
+			ContentValues values = new ContentValues();
+			values.put(KeyProvider.NUMBER, phoneNumber);
+			values.put(KeyProvider.KEY, key);
+			Uri uri = context.getContentResolver().insert(KeyProvider.CONTENT_URI, values);
+		}
 
-	/**
-	 * looks up the key associated with the sender and decrypts the message
-	 * 
-	 * @param message
-	 *            : encrypted text message
-	 * @param sender
-	 *            : string of the senders phone number
-	 */
-	private String decrypt(String message, String sender, String key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		// TODO
+		public String getKey(String number, Context context) {
+			String URL = "content://com.example.contentprovidertest.Keys/users";
+			Uri users = Uri.parse(URL);
+			Cursor c = context.getContentResolver()
+					.query(users, null, null, null, "number");
+			if (!c.moveToFirst()) {
+				return "";
+			} else {
+				do {
+					if (c.getString(c.getColumnIndex(KeyProvider.NUMBER))
+							.equalsIgnoreCase(number)) {
+						return c.getString(c.getColumnIndex(KeyProvider.KEY));
+					}
+				} while (c.moveToNext());
+				return "";
+			}
+		}
 }
