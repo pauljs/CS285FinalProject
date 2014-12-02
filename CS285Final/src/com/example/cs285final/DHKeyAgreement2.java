@@ -167,13 +167,13 @@ public class DHKeyAgreement2 {
         return aliceKeyAgree;
     }
     
-    public byte[] encrypt(String plaintext, KeyAgreement bobKeyAgree) throws Exception {
+    public DoubleBytes encrypt(String plaintext, KeyAgreement bobKeyAgree) throws Exception {
     	/*
          * Now let's return the shared secret as a SecretKey object
          * and use it for encryption. First, we generate SecretKeys for the
          * "DES" algorithm (based on the raw shared secret data) and
-         * then we use DES in ECB mode
-         * as the encryption algorithm. DES in ECB mode does not require any
+         * then we use DES in CBC mode
+         * as the encryption algorithm. DES in CBC mode does not require any
          * parameters.
          *
          * Then we use DES in CBC mode, which requires an initialization
@@ -207,20 +207,23 @@ public class DHKeyAgreement2 {
          */
         SecretKey bobDesKey = bobKeyAgree.generateSecret("DES");
 
-        
 
+        
         /*
-         * Bob encrypts, using DES in ECB mode
+         * Bob encrypts, using DES in CBC mode
          */
-        Cipher bobCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+        Cipher bobCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
         bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey);
 
         byte[] cleartext = plaintext.getBytes();
         byte[] ciphertext = bobCipher.doFinal(cleartext);
-        return ciphertext;
+        // Retrieve the parameter that was used, and transfer it to Alice in
+        // encoded format
+        byte[] encodedParams = bobCipher.getParameters().getEncoded();
+        return new DoubleBytes(ciphertext, encodedParams);
     }
     
-    public String decrypt(byte[] ciphertext, KeyAgreement aliceKeyAgree) throws Exception {
+    public String decrypt(byte[] ciphertext, byte[] encodedParams, KeyAgreement aliceKeyAgree) throws Exception {
     	// Alice
         // NOTE: The call to aliceKeyAgree.generateSecret above reset the key
         // agreement object, so we call doPhase again prior to another
@@ -232,11 +235,16 @@ public class DHKeyAgreement2 {
     	 */
     	
         SecretKey aliceDesKey = aliceKeyAgree.generateSecret("DES");
-    	/*
-         * Alice decrypts, using DES in ECB mode
+        
+        /*
+         * Alice decrypts, using DES in CBC mode
          */
-        Cipher aliceCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-        aliceCipher.init(Cipher.DECRYPT_MODE, aliceDesKey);
+        // Instantiate AlgorithmParameters object from parameter encoding
+        // obtained from Bob
+        AlgorithmParameters params = AlgorithmParameters.getInstance("DES");
+        params.init(encodedParams);
+        Cipher aliceCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+        aliceCipher.init(Cipher.DECRYPT_MODE, aliceDesKey, params);
         byte[] recovered = aliceCipher.doFinal(ciphertext);
         return new String(recovered);
     }
