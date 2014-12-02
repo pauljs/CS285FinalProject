@@ -55,6 +55,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.cs285final.MainActivity" />
         </activity>
+        
+        <provider android:name="KeyProvider"
+            android:authorities="com.example.contentprovidertest.Keys">
+        </provider>
     </application>
 
 </manifest>

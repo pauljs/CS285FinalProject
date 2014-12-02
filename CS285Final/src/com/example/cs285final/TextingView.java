@@ -7,11 +7,11 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.NavUtils;
 import android.telephony.SmsManager;
 import android.text.Editable;
@@ -85,6 +85,32 @@ public class TextingView extends Activity {
 		});
 	}
 
+	// TODO
+	public void addUserKeyInfo(String phoneNumber, String key) {
+		ContentValues values = new ContentValues();
+		values.put(KeyProvider.NUMBER, phoneNumber);
+		values.put(KeyProvider.KEY, key);
+		Uri uri = getContentResolver().insert(KeyProvider.CONTENT_URI, values);
+	}
+
+	// TODO
+	public String getKey(String number) {
+		String URL = "content://com.example.contentprovidertest.Keys/users";
+		Uri users = Uri.parse(URL);
+		Cursor c = getContentResolver()
+				.query(users, null, null, null, "number");
+		if (!c.moveToFirst()) {
+			return "";
+		} else {
+			do {
+				if (c.getString(c.getColumnIndex(KeyProvider.NUMBER))
+						.equalsIgnoreCase(number)) {
+					return c.getString(c.getColumnIndex(KeyProvider.KEY));
+				}
+			} while (c.moveToNext());
+			return "";
+		}
+	}
 	private void populatePastTexts() {
 		List<String> prevTexts = new ArrayList<String>();
 		prevTexts = getPrevTexts((String) getIntent().getExtras().get("number"));
