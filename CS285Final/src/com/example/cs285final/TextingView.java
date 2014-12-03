@@ -138,7 +138,7 @@ public class TextingView extends Activity {
 					}
 				}
 				result.add(new Pair<String, Long>(number + ": " + toAdd,c.getLong(4)));
-				Log.d("TEXTVIEW", c.getString(12));
+		//		Log.d("TEXTVIEW", c.getString(12));
 			}
 		}
 		c.close();
@@ -165,7 +165,7 @@ public class TextingView extends Activity {
 					}
 				}
 				result.add(new Pair<String, Long>(myNumber + ": " +toAdd,d.getLong(4)));
-				Log.d("TEXTVIEW", d.getString(12));
+			//	Log.d("TEXTVIEW", d.getString(12));
 			}
 		}
 		Collections.sort(result, new Comparator<Pair<String, Long>>() {

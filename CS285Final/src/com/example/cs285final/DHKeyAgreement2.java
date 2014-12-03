@@ -221,7 +221,7 @@ public class DHKeyAgreement2 {
         Cipher bobCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
         bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey);
 
-        byte[] cleartext = plaintext.getBytes();
+        byte[] cleartext = convertToBytes(plaintext);
         byte[] ciphertext = bobCipher.doFinal(cleartext);
         // Retrieve the parameter that was used, and transfer it to Alice in
         // encoded format
@@ -332,4 +332,16 @@ public class DHKeyAgreement2 {
 
     // The base used with the SKIP 1024 bit modulus
     private static final BigInteger skip1024Base = BigInteger.valueOf(2);
+    
+	private byte[] convertToBytes(String str) {
+		String[] byteValues = str.substring(1, str.length() - 1).split(",");
+        byte[] bytes = new byte[byteValues.length];
+
+        for (int i=0, len=bytes.length; i<len; i++) {
+           bytes[i] = Byte.parseByte(byteValues[i].trim());     
+        }
+        return bytes;
+	}
+
+
 }
