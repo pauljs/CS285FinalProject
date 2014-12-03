@@ -11,7 +11,6 @@ import android.content.*;
 import android.os.Bundle;
 import android.telephony.*;
 import android.util.Log;
-import android.widget.Toast;
 
 public class SMSReceiver extends BroadcastReceiver {
 

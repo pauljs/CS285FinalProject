@@ -37,6 +37,7 @@ package com.example.cs285final;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.*;
+import java.util.Arrays;
 //import java.security.interfaces.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -249,7 +250,7 @@ public class DHKeyAgreement2 {
         Cipher aliceCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
         aliceCipher.init(Cipher.DECRYPT_MODE, aliceDesKey, params);
         byte[] recovered = aliceCipher.doFinal(ciphertext);
-        return new String(recovered);
+        return Arrays.toString(recovered);
     }
 
     /*
