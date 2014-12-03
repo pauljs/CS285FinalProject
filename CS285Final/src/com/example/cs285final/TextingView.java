@@ -32,7 +32,9 @@ public class TextingView extends Activity {
 	EditText contactName;
 	Button sendButton;
 	ArrayAdapter<String> textAdapter;
-	String number;
+	String myNumber;
+	String contact;
+	final String LOG = "Texting View: ";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +42,14 @@ public class TextingView extends Activity {
 		setContentView(R.layout.activity_texting_view);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		number = (String) getIntent().getExtras().get("number");
+		myNumber = (String) getIntent().getExtras().get("number");
+		contact = (String) getIntent().getExtras().getString("contactNumber");
 		textList = (ListView) findViewById(R.id.listView1);
 		textField = (EditText) findViewById(R.id.editText1);
 		contactName = (EditText) findViewById(R.id.editText2);
+		contactName.setText((String) getIntent().getExtras().getString("contactName")); 
 		
-		
-
+		Log.i(LOG, "my#: " + myNumber + " contact#: " + contact);
 		
 		populatePastTexts();
 		
@@ -78,7 +81,7 @@ public class TextingView extends Activity {
 				 */
 				message = "\"" + message + "\"";
 				SmsManager sms = SmsManager.getDefault();
-				sms.sendTextMessage(number, "6318852193", message, null, null);
+				sms.sendTextMessage(contact, myNumber, message, null, null);
 				
 			}
 			
@@ -113,7 +116,7 @@ public class TextingView extends Activity {
 	}
 	private void populatePastTexts() {
 		List<String> prevTexts = new ArrayList<String>();
-		prevTexts = getPrevTexts((String) getIntent().getExtras().get("number"));
+		prevTexts = getPrevTexts(contact);
 	//	ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
     //            this, 
     //            /*not sure, need to talk to erin*/R.layout.text,
@@ -162,7 +165,7 @@ public class TextingView extends Activity {
 					//TODO DECRYPT
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 				}
-				result.add(new Pair<String, Long>("6318852193: " +toAdd,d.getLong(4)));
+				result.add(new Pair<String, Long>(myNumber + ": " +toAdd,d.getLong(4)));
 				Log.d("TEXTVIEW", d.getString(12));
 			}
 		}

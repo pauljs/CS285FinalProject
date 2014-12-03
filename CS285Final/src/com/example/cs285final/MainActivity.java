@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -12,6 +13,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -27,11 +30,18 @@ public class MainActivity extends Activity {
 	Button loadBtn;
 	ArrayAdapter<String> adapter;
 	final String PARENT = "com.example.cs285final";
+	final String LOG = "MainActivity: ";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		final TelephonyManager tMgr = (TelephonyManager) this
+				.getSystemService(Context.TELEPHONY_SERVICE);
+		final String myPhoneNumber = tMgr.getLine1Number();
+		Log.i(LOG, "My Phone Number: " + myPhoneNumber);
+		
 		ll = (LinearLayout) findViewById(R.id.LinearLayout1);
 
 		list = (ListView) findViewById(R.id.listView1);
@@ -40,11 +50,25 @@ public class MainActivity extends Activity {
 			@Override
 			public void onItemClick(final AdapterView<?> parent,
 					final View view, final int position, final long id) {
-				// TODO Auto-generated method stub
-				final String info = adapter.getItem(position);
-				// Intent intent = new Intent(getApplicationContext(),
-				// MessagingActivity.class).putExtra("contact_info", "info");
-				// startActivity(intent);
+				String info = adapter.getItem(position);
+				
+				final String[] t = info.split(":");
+				final String phoneNumber = t[1];
+				final String name = t[0];
+				Log.i(LOG, "#: " + phoneNumber + "Name: " + name);
+				if (!info.contains("*")) {
+					info = info.concat("*");
+					adapter.insert(info, position);
+					// TODO: start handshake
+				}
+				
+				// Switch to texting view
+				final Intent intent = new Intent(MainActivity.this, TextingView.class);
+				intent.putExtra(PARENT, "test");
+				intent.putExtra("number", myPhoneNumber); 
+				intent.putExtra("contactNumber", phoneNumber);
+				intent.putExtra("contactName", name);
+				startActivity(intent);
 			}
 		});
 		loadBtn = (Button) findViewById(R.id.button1);
@@ -52,25 +76,16 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				
 				final LoadContactsAyscn lca = new LoadContactsAyscn();
 				lca.execute();
 			}
 		});
 		
-		Button textingView = (Button) findViewById(R.id.button2);
-
 	}
 	
 	// Starts the new activity for the texting part of the app
 	public void onTextingView(View view) {
-		Intent intent = new Intent(this, TextingView.class);
-		intent.putExtra(PARENT, "test");
-		intent.putExtra("number", "7136771354");
-		//TODO: Added the contact of the person chosen
-	//	intent.putExtra("contactNumber", "");
-		startActivity(intent);
+
 	}
 
 	// STORAGE IS ONE STRING SEPARATING CONTACTS BY SEMICOLONS AND
@@ -110,7 +125,6 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			// TODO Auto-generated method stub
 			super.onPreExecute();
 
 			pd = ProgressDialog.show(MainActivity.this, "Loading Contacts",
@@ -119,7 +133,6 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected ArrayList<String> doInBackground(Void... params) {
-			// TODO Auto-generated method stub
 			final ArrayList<String> contacts = new ArrayList<String>();
 
 			final Cursor c = getContentResolver().query(
@@ -130,9 +143,10 @@ public class MainActivity extends Activity {
 				final String contactName = c
 						.getString(c
 								.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-				final String phNumber = c
+				String phNumber = c
 						.getString(c
 								.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+				phNumber = parseNumber(phNumber);
 
 				contacts.add(contactName + ":" + phNumber);
 
@@ -142,9 +156,15 @@ public class MainActivity extends Activity {
 			return contacts;
 		}
 
+		private String parseNumber(String phNumber) {
+			phNumber = phNumber.replaceAll("[()-]", "");
+			phNumber = phNumber.replaceAll("\\s", "");
+			Log.i(LOG, "Number: " + phNumber);
+			return phNumber;
+		}
+
 		@Override
 		protected void onPostExecute(ArrayList<String> contacts) {
-			// TODO Auto-generated method stub
 			super.onPostExecute(contacts);
 
 			pd.cancel();
