@@ -43,6 +43,8 @@ import javax.crypto.spec.*;
 import javax.crypto.interfaces.*;
 //import com.sun.crypto.provider.SunJCE;
 
+import android.util.Log;
+
 /**
  * This program executes the Diffie-Hellman key agreement protocol
  * between 2 parties: Alice and Bob.
@@ -99,10 +101,17 @@ public class DHKeyAgreement2 {
          * in encoded format.
          * He instantiates a DH public key from the encoded key material.
          */
+		Log.d("BLAH 4", "BLAH 4");
+
         KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
+		Log.d("BLAH 5", "BLAH 5");
+
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec
             (alicePubKeyEnc);
+		Log.d("BLAH 6", "BLAH 6");
+
         PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
+		Log.d("BLAH 7", "BLAH 7");
 
         /*
          * Bob gets the DH parameters associated with Alice's public key.
@@ -110,17 +119,20 @@ public class DHKeyAgreement2 {
          * pair.
          */
         DHParameterSpec dhParamSpec = ((DHPublicKey)alicePubKey).getParams();
+		Log.d("BLAH 8", "BLAH 8");
 
         // Bob creates his own DH key pair
         System.out.println("BOB: Generate DH keypair ...");
         KeyPairGenerator bobKpairGen = KeyPairGenerator.getInstance("DH");
         bobKpairGen.initialize(dhParamSpec);
         KeyPair bobKpair = bobKpairGen.generateKeyPair();
+		Log.d("BLAH 9", "BLAH 9");
 
         // Bob creates and initializes his DH KeyAgreement object
         System.out.println("BOB: Initialization ...");
         KeyAgreement bobKeyAgree = KeyAgreement.getInstance("DH");
         bobKeyAgree.init(bobKpair.getPrivate());
+		Log.d("BLAH 10", "BLAH 10");
 
         
         /*

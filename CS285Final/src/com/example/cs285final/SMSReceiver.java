@@ -46,9 +46,15 @@ public class SMSReceiver extends BroadcastReceiver {
 			if(message.startsWith(MainActivity.RECIEVE_INITAL)){
 				Log.d("SMSRECIEVER", "started with:" + MainActivity.RECIEVE_INITAL);
 				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(message.substring(4).getBytes());
+				Log.d("BLAH 1", "BLAH 1");
 				KeyProvider.addUserKeyInfo(sender, t.getAliceKeyAgree().generateSecret("DES"), context);
+				Log.d("BLAH 2", "BLAH 2");
+
 				byte[] toSend = cryptographyHelper.receiveInitialHandShakePart2(t.getAliceKpair());
+				Log.d("BLAH 3", "BLAH 3");
+
 				SmsManager sms = SmsManager.getDefault();
+				Log.d("THE SENDER NUMBER IS ", myPhoneNumber);
 				sms.sendTextMessage(sender, myPhoneNumber, URLEncoder.encode(MainActivity.COMPLETE_HANDSHAKE + new String(toSend)), null, null);
 			} else if(message.startsWith(MainActivity.COMPLETE_HANDSHAKE)){
 				Log.d("SMSRECIEVER", "started with:" + MainActivity.COMPLETE_HANDSHAKE);
