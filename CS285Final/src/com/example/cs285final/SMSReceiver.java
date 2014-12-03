@@ -1,5 +1,6 @@
 package com.example.cs285final;
 
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +23,9 @@ public class SMSReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		//if (intent.equals("SMS_RECEIVED"))
 		abortBroadcast(); // stops message from going to receiver's text screen
-
+		final TelephonyManager tMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		final String myPhoneNumber = tMgr.getLine1Number();
+		
 		final Bundle bundle = intent.getExtras();
 		final Object[] pdus = (Object[]) bundle.get("pdus");
 		final SmsMessage[] messages = new SmsMessage[pdus.length];
@@ -33,8 +36,9 @@ public class SMSReceiver extends BroadcastReceiver {
 			sb.append(messages[i].getMessageBody());
 		}
 		final String sender = messages[0].getOriginatingAddress();
-		final String message = sb.toString();
-		
+		Log.d("SMSRECIEVER", "notDecoded: "+ sb.toString());
+		final String message = URLDecoder.decode(sb.toString());
+		Log.d("SMSRECIEVER", "Decoded: " + message);
 		DHKeyAgreement2 cryptographyHelper = new DHKeyAgreement2();
 		try{
 			if(message.substring(0, 4).equals(MainActivity.RECIEVE_INITAL)){
@@ -42,7 +46,7 @@ public class SMSReceiver extends BroadcastReceiver {
 				KeyProvider.addUserKeyInfo(sender, t.getAliceKeyAgree().generateSecret("DES"), context);
 				byte[] toSend = cryptographyHelper.receiveInitialHandShakePart2(t.getAliceKpair());
 				SmsManager sms = SmsManager.getDefault();
-				sms.sendTextMessage(sender, "",MainActivity.COMPLETE_HANDSHAKE + new String(toSend), null, null);
+				sms.sendTextMessage(sender, myPhoneNumber, MainActivity.COMPLETE_HANDSHAKE + new String(toSend), null, null);
 			} else if(message.substring(0, 4).equals(MainActivity.COMPLETE_HANDSHAKE)){
 				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), MainActivity.currentKeyAgreement);
 				KeyProvider.addUserKeyInfo(sender, k.generateSecret("DES"), context);
