@@ -39,17 +39,13 @@ public class SMSReceiver extends BroadcastReceiver {
 		try{
 			if(message.substring(0, 4).equals(MainActivity.RECIEVE_INITAL)){
 				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(message.substring(4).getBytes());
-				//TODO: DOES THIS WORK?
-				addUserKeyInfo(sender, new String(t.getAliceKeyAgree().generateSecret("DES").toString()), context);
+				KeyProvider.addUserKeyInfo(sender, t.getAliceKeyAgree().generateSecret("DES"), context);
 				byte[] toSend = cryptographyHelper.receiveInitialHandShakePart2(t.getAliceKpair());
 				SmsManager sms = SmsManager.getDefault();
 				sms.sendTextMessage(sender, "",MainActivity.COMPLETE_HANDSHAKE + new String(toSend), null, null);
 			} else if(message.substring(0, 4).equals(MainActivity.COMPLETE_HANDSHAKE)){
-				//TODO: THIS DOES NOT WORK
-				//KeyAgreement temp = null;//KeyAgreement(getKey(sender, context).getBytes());
-				//KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), temp);
 				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), MainActivity.currentKeyAgreement);
-				addUserKeyInfo(sender, new String(k.generateSecret("DES").toString()), context);
+				KeyProvider.addUserKeyInfo(sender, k.generateSecret("DES"), context);
 			}
 		}
 		catch (Exception e){}

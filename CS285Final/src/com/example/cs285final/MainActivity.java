@@ -64,7 +64,6 @@ public class MainActivity extends Activity {
 				if (!info.contains("*")) {
 					info = info.concat("*");
 					adapter.insert(info, position);
-					// TODO: start handshake
 					DHKeyAgreement2 temp = new DHKeyAgreement2();
 					Transfer transfer = null;
 					try {
@@ -74,8 +73,8 @@ public class MainActivity extends Activity {
 					}
 					MainActivity.currentKeyAgreement = transfer.getAliceKeyAgree();
 					byte[] alicePubKeyEnc = temp.startHandshakePart2(transfer.getAliceKpair());
-					//SEND THIS TO BOB PLEASE
-					//TODO
+					
+					
 					SmsManager sms = SmsManager.getDefault();
 					sms.sendTextMessage(phoneNumber, "",MainActivity.RECIEVE_INITAL + new String(alicePubKeyEnc), null, null);
 				}
