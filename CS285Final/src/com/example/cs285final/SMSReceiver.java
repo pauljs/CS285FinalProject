@@ -1,6 +1,7 @@
 package com.example.cs285final;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,13 +42,13 @@ public class SMSReceiver extends BroadcastReceiver {
 		Log.d("SMSRECIEVER", "Decoded: " + message);
 		DHKeyAgreement2 cryptographyHelper = new DHKeyAgreement2();
 		try{
-			if(message.substring(0, 4).equals(MainActivity.RECIEVE_INITAL)){
+			if(message.startsWith(MainActivity.RECIEVE_INITAL)){
 				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(message.substring(4).getBytes());
 				KeyProvider.addUserKeyInfo(sender, t.getAliceKeyAgree().generateSecret("DES"), context);
 				byte[] toSend = cryptographyHelper.receiveInitialHandShakePart2(t.getAliceKpair());
 				SmsManager sms = SmsManager.getDefault();
-				sms.sendTextMessage(sender, myPhoneNumber, MainActivity.COMPLETE_HANDSHAKE + new String(toSend), null, null);
-			} else if(message.substring(0, 4).equals(MainActivity.COMPLETE_HANDSHAKE)){
+				sms.sendTextMessage(sender, myPhoneNumber, URLEncoder.encode(MainActivity.COMPLETE_HANDSHAKE + new String(toSend)), null, null);
+			} else if(message.startsWith(MainActivity.COMPLETE_HANDSHAKE)){
 				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), MainActivity.currentKeyAgreement);
 				KeyProvider.addUserKeyInfo(sender, k.generateSecret("DES"), context);
 			}
