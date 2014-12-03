@@ -60,7 +60,7 @@ public class DHKeyAgreement2 {
     
     
 
-    public Transfer startHandshakePart1(String phoneNumber) throws Exception {
+    public Transfer startHandshakePart1() throws Exception {
         DHParameterSpec dhSkipParamSpec;
     	// use some pre-generated, default DH parameters
         System.out.println("Using SKIP Diffie-Hellman parameters");

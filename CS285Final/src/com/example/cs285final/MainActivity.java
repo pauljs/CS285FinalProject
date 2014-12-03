@@ -2,6 +2,8 @@ package com.example.cs285final;
 
 import java.util.ArrayList;
 
+import javax.crypto.KeyAgreement;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -13,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -33,7 +36,7 @@ public class MainActivity extends Activity {
 	ArrayAdapter<String> adapter;
 	final String PARENT = "com.example.cs285final";
 	final String LOG = "MainActivity: ";
-	
+	public static KeyAgreement currentKeyAgreement;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -62,6 +65,19 @@ public class MainActivity extends Activity {
 					info = info.concat("*");
 					adapter.insert(info, position);
 					// TODO: start handshake
+					DHKeyAgreement2 temp = new DHKeyAgreement2();
+					Transfer transfer = null;
+					try {
+						transfer = temp.startHandshakePart1();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					MainActivity.currentKeyAgreement = transfer.getAliceKeyAgree();
+					byte[] alicePubKeyEnc = temp.startHandshakePart2(transfer.getAliceKpair());
+					//SEND THIS TO BOB PLEASE
+					//TODO
+					SmsManager sms = SmsManager.getDefault();
+					sms.sendTextMessage(phoneNumber, "",MainActivity.RECIEVE_INITAL + new String(alicePubKeyEnc), null, null);
 				}
 				
 				// Switch to texting view

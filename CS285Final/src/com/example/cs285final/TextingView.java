@@ -76,9 +76,7 @@ public class TextingView extends Activity {
 			}
 
 			private void EncryptAndSend(String message) {
-				/*
-				 * TODO ENCRYPTION GOES HERE
-				 */
+				getKey(contact);
 				message = "\"" + message + "\"";
 				SmsManager sms = SmsManager.getDefault();
 				sms.sendTextMessage(contact, myNumber, message, null, null);
