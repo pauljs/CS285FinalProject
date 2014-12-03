@@ -2,6 +2,7 @@ package com.example.cs285final;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +57,8 @@ public class SMSReceiver extends BroadcastReceiver {
 
 				SmsManager sms = SmsManager.getDefault();
 				Log.d("THE SENDER NUMBER IS ", myPhoneNumber);
-				sms.sendTextMessage(sender, myPhoneNumber, (MainActivity.COMPLETE_HANDSHAKE + Arrays.toString(toSend)), null, null);
+				ArrayList<String> msgArray=sms.divideMessage((MainActivity.COMPLETE_HANDSHAKE+ Arrays.toString(toSend)));
+				sms.sendMultipartTextMessage(sender, myPhoneNumber, msgArray, null, null);
 			} else if(message.startsWith(MainActivity.COMPLETE_HANDSHAKE)){
 				Log.d("SMSRECIEVER", "started with:" + MainActivity.COMPLETE_HANDSHAKE);
 				KeyAgreement k = cryptographyHelper.completeHandshake(convertToBytes(message.substring(4)), MainActivity.currentKeyAgreement);
