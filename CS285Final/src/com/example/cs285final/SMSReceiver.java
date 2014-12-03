@@ -36,8 +36,9 @@ public class SMSReceiver extends BroadcastReceiver {
 			sb.append(messages[i].getMessageBody());
 		}
 		final String sender = messages[0].getOriginatingAddress();
+		Log.d("SMSRECIEVER", "notDecoded: "+ sb.toString());
 		final String message = URLDecoder.decode(sb.toString());
-		
+		Log.d("SMSRECIEVER", "Decoded: " + message);
 		DHKeyAgreement2 cryptographyHelper = new DHKeyAgreement2();
 		try{
 			if(message.substring(0, 4).equals(MainActivity.RECIEVE_INITAL)){
