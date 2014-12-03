@@ -25,6 +25,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 public class MainActivity extends Activity {
+	public static final String RECIEVE_INITAL = "i5d3";
+	public static final String COMPLETE_HANDSHAKE = "n5s2";
 	ListView list;
 	LinearLayout ll;
 	Button loadBtn;
