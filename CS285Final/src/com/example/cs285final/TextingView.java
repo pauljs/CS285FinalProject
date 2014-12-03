@@ -1,8 +1,7 @@
 package com.example.cs285final;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -88,10 +87,10 @@ public class TextingView extends Activity {
 					byte[] c = new byte[toSend.getEncodedParams().length + toSend.getCiphertext().length];
 					System.arraycopy(toSend.getEncodedParams(), 0, c, 0, toSend.getEncodedParams().length);
 					System.arraycopy(toSend.getCiphertext(), 0, c, toSend.getEncodedParams().length, toSend.getCiphertext().length);
-					message = new String(c);
+					message = Arrays.toString(c);
 				} catch (Exception e) {
 					}
-				message = "\"" + URLEncoder.encode(message) + "\"";
+				message = "\"" + message + "\"";
 				SmsManager sms = SmsManager.getDefault();
 				sms.sendTextMessage(contact, myNumber, message, null, null);
 				
@@ -126,14 +125,14 @@ public class TextingView extends Activity {
 				if(toAdd.charAt(0)=='\"'){
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 					try{
-						byte[] wholeMessage = toAdd.getBytes();
+						byte[] wholeMessage = convertToBytes(toAdd);
 						byte[] params = new byte[18];
 						byte[] cipherText = new byte[wholeMessage.length-18];
 						System.arraycopy(wholeMessage, 0, params, 0, params.length);
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
-						toAdd = URLDecoder.decode(plaintext);
+						toAdd = plaintext;
 					} catch (Exception e) {
 					}
 				}
@@ -153,14 +152,14 @@ public class TextingView extends Activity {
 				if(toAdd.charAt(0)=='\"'){
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 					try{
-						byte[] wholeMessage = toAdd.getBytes();
+						byte[] wholeMessage = convertToBytes(toAdd);
 						byte[] params = new byte[18];
 						byte[] cipherText = new byte[wholeMessage.length-18];
 						System.arraycopy(wholeMessage, 0, params, 0, params.length);
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
-						toAdd = URLDecoder.decode(plaintext);
+						toAdd = plaintext;
 					}catch(Exception e){
 					}
 				}
@@ -215,6 +214,17 @@ public class TextingView extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+
+	private byte[] convertToBytes(String str) {
+		String[] byteValues = str.substring(1, str.length() - 1).split(",");
+        byte[] bytes = new byte[byteValues.length];
+
+        for (int i=0, len=bytes.length; i<len; i++) {
+           bytes[i] = Byte.parseByte(byteValues[i].trim());     
+        }
+        return bytes;
 	}
 
 }
