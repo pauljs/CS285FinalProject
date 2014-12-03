@@ -38,7 +38,7 @@ public class SMSReceiver extends BroadcastReceiver {
 		}
 		final String sender = messages[0].getOriginatingAddress();
 		Log.d("SMSRECIEVER", "notDecoded: "+ sb.toString());
-		final String message = URLDecoder.decode(sb.toString());
+		final String message = (sb.toString());
 		Log.d("SMSRECIEVER", "Decoded: " + message);
 		DHKeyAgreement2 cryptographyHelper = new DHKeyAgreement2();
 		try{
@@ -55,7 +55,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
 				SmsManager sms = SmsManager.getDefault();
 				Log.d("THE SENDER NUMBER IS ", myPhoneNumber);
-				sms.sendTextMessage(sender, myPhoneNumber, URLEncoder.encode(MainActivity.COMPLETE_HANDSHAKE + new String(toSend)), null, null);
+				sms.sendTextMessage(sender, myPhoneNumber, (MainActivity.COMPLETE_HANDSHAKE + new String(toSend)), null, null);
 			} else if(message.startsWith(MainActivity.COMPLETE_HANDSHAKE)){
 				Log.d("SMSRECIEVER", "started with:" + MainActivity.COMPLETE_HANDSHAKE);
 				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), MainActivity.currentKeyAgreement);
