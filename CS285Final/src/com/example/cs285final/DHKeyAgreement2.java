@@ -33,17 +33,14 @@ package com.example.cs285final;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-//import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.*;
-import java.util.Arrays;
-//import java.security.interfaces.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import javax.crypto.interfaces.*;
-//import com.sun.crypto.provider.SunJCE;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 /**
@@ -63,7 +60,7 @@ public class DHKeyAgreement2 {
     
     
 
-    public Transfer startHandshakePart1() throws Exception {
+    @SuppressLint("TrulyRandom") public Transfer startHandshakePart1() throws Exception {
         DHParameterSpec dhSkipParamSpec;
     	// use some pre-generated, default DH parameters
         System.out.println("Using SKIP Diffie-Hellman parameters");
@@ -71,7 +68,7 @@ public class DHKeyAgreement2 {
                                               skip1024Base);
         /*
          * Alice creates her own DH key pair, using the DH parameters from
-         * above
+         * above 
          */
         System.out.println("ALICE: Generate DH keypair ...");
         KeyPairGenerator aliceKpairGen = KeyPairGenerator.getInstance("DH");
@@ -213,13 +210,13 @@ public class DHKeyAgreement2 {
         // NOTE: The call to bobKeyAgree.generateSecret above reset the key
         // agreement object, so we call doPhase again prior to another
         // generateSecret call
-        //bobKeyAgree.doPhase(alicePubKey, true); // not needed because done in handshake
                 
         /*
          * Bob encrypts, using DES in CBC mode
          */
         Cipher bobCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
-        bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey);
+        final IvParameterSpec iv = new IvParameterSpec(new byte[8]);
+        bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey, iv);
 
         byte[] cleartext = plaintext.getBytes();
         byte[] ciphertext = bobCipher.doFinal(cleartext);
@@ -236,10 +233,6 @@ public class DHKeyAgreement2 {
         // generateSecret call
         //aliceKeyAgree.doPhase(bobPubKey, true);//not needed because done in handshake
     	
-    	/*
-         //GET bobKeyAgree FROM CONTENT PROVIDER HERE
-    	 */
-    	
         /*
          * Alice decrypts, using DES in CBC mode
          */
@@ -253,42 +246,6 @@ public class DHKeyAgreement2 {
         return new String(recovered);
     }
 
-    /*
-     * Converts a byte to hex digit and writes to the supplied buffer
-     */
-    private void byte2hex(byte b, StringBuffer buf) {
-        char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-                            '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-        int high = ((b & 0xf0) >> 4);
-        int low = (b & 0x0f);
-        buf.append(hexChars[high]);
-        buf.append(hexChars[low]);
-    }
-
-    /*
-     * Converts a byte array to hex string
-     */
-    private String toHexString(byte[] block) {
-        StringBuffer buf = new StringBuffer();
-
-        int len = block.length;
-
-        for (int i = 0; i < len; i++) {
-             byte2hex(block[i], buf);
-             if (i < len-1) {
-                 buf.append(":");
-             }
-        }
-        return buf.toString();
-    }
-
-    /*
-     * Prints the usage of this test.
-     */
-    private void usage() {
-        System.err.print("DHKeyAgreement usage: ");
-        System.err.println("[-gen]");
-    }
 
     // The 1024 bit Diffie-Hellman modulus values used by SKIP
     private static final byte skip1024ModulusBytes[] = {
@@ -332,16 +289,4 @@ public class DHKeyAgreement2 {
 
     // The base used with the SKIP 1024 bit modulus
     private static final BigInteger skip1024Base = BigInteger.valueOf(2);
-    
-	private byte[] convertToBytes(String str) {
-		String[] byteValues = str.substring(1, str.length() - 1).split(",");
-        byte[] bytes = new byte[byteValues.length];
-
-        for (int i=0, len=bytes.length; i<len; i++) {
-           bytes[i] = Byte.parseByte(byteValues[i].trim());     
-        }
-        return bytes;
-	}
-
-
 }

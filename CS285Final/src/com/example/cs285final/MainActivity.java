@@ -1,6 +1,5 @@
 package com.example.cs285final;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -10,12 +9,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -94,12 +90,10 @@ public class MainActivity extends Activity {
 				startActivity(intent);
 				return false;
 			}
-			
 		});
 		
 		// On normal click, go to texting view
 		list.setOnItemClickListener(new OnItemClickListener() {
-
 			@Override
 			public void onItemClick(final AdapterView<?> parent,
 					final View view, final int position, final long id) {
@@ -131,38 +125,6 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-	}
-
-	// STORAGE IS ONE STRING SEPARATING CONTACTS BY SEMICOLONS AND
-	// INFORMATION WITHIN THE CONTACT BY COMMAS
-	public String getStorage() {
-		final SharedPreferences sp = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		// storage exists so get it
-		if (sp.contains("storage")) {
-			return sp.getString("storage", "");
-		} else {// storage does not exist (AKA first time opening application)
-			Editor edit = sp.edit();
-			edit.putString("storage", "");
-			edit.commit();
-			return "";
-		}
-	}
-
-	// FORMAT: storage is really one string
-	// contacts are separated by semicolons
-	// within a contact, the phoneNumber is first then a comma to separate it
-	// from the key
-	public void addToStorage(final String phoneNumber, final String key) {
-		String storage = getStorage();
-		storage = storage + ";" + phoneNumber + "," + key;
-		final SharedPreferences sp = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		Editor edit = sp.edit();
-		edit.putString("storage", storage);
-		while (!edit.commit()) {
-		}
-		;
 	}
 
 	class LoadContactsAyscn extends AsyncTask<Void, Void, ArrayList<String>> {
