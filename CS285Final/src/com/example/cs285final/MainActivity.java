@@ -2,6 +2,7 @@ package com.example.cs285final;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.crypto.KeyAgreement;
 
@@ -80,7 +81,7 @@ public class MainActivity extends Activity {
 					byte[] alicePubKeyEnc = temp.startHandshakePart2(transfer.getAliceKpair());
 					
 					SmsManager sms = SmsManager.getDefault();
-					ArrayList<String> msgArray=sms.divideMessage((MainActivity.RECIEVE_INITAL+ new String(alicePubKeyEnc)));
+					ArrayList<String> msgArray=sms.divideMessage((MainActivity.RECIEVE_INITAL+ Arrays.toString(alicePubKeyEnc)));
 					sms.sendMultipartTextMessage(phoneNumber, myPhoneNumber, msgArray, null, null);
 				}
 				

@@ -2,6 +2,7 @@ package com.example.cs285final;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,7 +46,7 @@ public class SMSReceiver extends BroadcastReceiver {
 			Log.d("SMSRECIEVER", "entered try");
 			if(message.startsWith(MainActivity.RECIEVE_INITAL)){
 				Log.d("SMSRECIEVER", "started with:" + MainActivity.RECIEVE_INITAL);
-				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(message.substring(4).getBytes());
+				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(convertToBytes(message.substring(4)));
 				Log.d("BLAH 1", "BLAH 1");
 				KeyProvider.addUserKeyInfo(sender, t.getAliceKeyAgree().generateSecret("DES"), context);
 				Log.d("BLAH 2", "BLAH 2");
@@ -55,16 +56,27 @@ public class SMSReceiver extends BroadcastReceiver {
 
 				SmsManager sms = SmsManager.getDefault();
 				Log.d("THE SENDER NUMBER IS ", myPhoneNumber);
-				sms.sendTextMessage(sender, myPhoneNumber, (MainActivity.COMPLETE_HANDSHAKE + new String(toSend)), null, null);
+				sms.sendTextMessage(sender, myPhoneNumber, (MainActivity.COMPLETE_HANDSHAKE + Arrays.toString(toSend)), null, null);
 			} else if(message.startsWith(MainActivity.COMPLETE_HANDSHAKE)){
 				Log.d("SMSRECIEVER", "started with:" + MainActivity.COMPLETE_HANDSHAKE);
-				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), MainActivity.currentKeyAgreement);
+				KeyAgreement k = cryptographyHelper.completeHandshake(convertToBytes(message.substring(4)), MainActivity.currentKeyAgreement);
 				KeyProvider.addUserKeyInfo(sender, k.generateSecret("DES"), context);
 			}
 			Log.d("SMSRECIEVER", "finished the if");
 			
 		}
 		catch (Exception e){}
+	}
+
+
+	private byte[] convertToBytes(String str) {
+		String[] byteValues = str.substring(1, str.length() - 1).split(",");
+        byte[] bytes = new byte[byteValues.length];
+
+        for (int i=0, len=bytes.length; i<len; i++) {
+           bytes[i] = Byte.parseByte(byteValues[i].trim());     
+        }
+        return bytes;
 	}
 
 
