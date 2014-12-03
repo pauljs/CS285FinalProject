@@ -1,5 +1,6 @@
 package com.example.cs285final;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import javax.crypto.KeyAgreement;
@@ -74,9 +75,9 @@ public class MainActivity extends Activity {
 					MainActivity.currentKeyAgreement = transfer.getAliceKeyAgree();
 					byte[] alicePubKeyEnc = temp.startHandshakePart2(transfer.getAliceKpair());
 					
-					
 					SmsManager sms = SmsManager.getDefault();
-					sms.sendTextMessage(phoneNumber, "",MainActivity.RECIEVE_INITAL + new String(alicePubKeyEnc), null, null);
+					ArrayList<String> msgArray=sms.divideMessage(MainActivity.RECIEVE_INITAL+ URLEncoder.encode(new String(alicePubKeyEnc)));
+					sms.sendMultipartTextMessage(phoneNumber, myPhoneNumber, msgArray, null, null);
 				}
 				
 				// Switch to texting view

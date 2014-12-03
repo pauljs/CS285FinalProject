@@ -1,5 +1,7 @@
 package com.example.cs285final;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -89,7 +91,7 @@ public class TextingView extends Activity {
 					message = new String(c);
 				} catch (Exception e) {
 					}
-				message = "\"" + message + "\"";
+				message = "\"" + URLEncoder.encode(message) + "\"";
 				SmsManager sms = SmsManager.getDefault();
 				sms.sendTextMessage(contact, myNumber, message, null, null);
 				
@@ -131,6 +133,7 @@ public class TextingView extends Activity {
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
+						toAdd = URLDecoder.decode(plaintext);
 					} catch (Exception e) {
 					}
 				}
@@ -157,6 +160,7 @@ public class TextingView extends Activity {
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
+						toAdd = URLDecoder.decode(plaintext);
 					}catch(Exception e){
 					}
 				}
