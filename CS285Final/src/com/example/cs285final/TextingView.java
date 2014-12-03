@@ -92,7 +92,8 @@ public class TextingView extends Activity {
 					}
 				message = "\"" + message + "\"";
 				SmsManager sms = SmsManager.getDefault();
-				sms.sendTextMessage(contact, myNumber, message, null, null);
+				ArrayList<String> msgArray=sms.divideMessage(message);
+				sms.sendMultipartTextMessage(contact, myNumber, msgArray, null, null);
 				
 			}
 			

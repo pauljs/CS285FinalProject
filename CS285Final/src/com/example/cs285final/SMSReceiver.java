@@ -1,7 +1,5 @@
 package com.example.cs285final;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -10,10 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.KeyAgreement;
 
 import android.content.*;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.telephony.*;
 import android.util.Log;
 import android.widget.Toast;
