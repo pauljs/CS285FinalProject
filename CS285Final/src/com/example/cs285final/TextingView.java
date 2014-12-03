@@ -84,11 +84,14 @@ public class TextingView extends Activity {
 					SecretKey secretKey = KeyProvider.getKey(contact, getApplicationContext());
 					DHKeyAgreement2 crypto = new DHKeyAgreement2();
 					DoubleBytes toSend = crypto.encrypt(message, secretKey);
+					Log.d("TextingView", "encrypted:" + Arrays.toString(toSend.getCiphertext()));
 					byte[] c = new byte[toSend.getEncodedParams().length + toSend.getCiphertext().length];
 					System.arraycopy(toSend.getEncodedParams(), 0, c, 0, toSend.getEncodedParams().length);
 					System.arraycopy(toSend.getCiphertext(), 0, c, toSend.getEncodedParams().length, toSend.getCiphertext().length);
 					message = Arrays.toString(c);
+					Log.d("TextingView", "message:" + message);
 				} catch (Exception e) {
+					e.printStackTrace();
 					}
 				message = "\"" + message + "\"";
 				SmsManager sms = SmsManager.getDefault();

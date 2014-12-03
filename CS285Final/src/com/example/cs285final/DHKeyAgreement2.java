@@ -221,7 +221,7 @@ public class DHKeyAgreement2 {
         Cipher bobCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
         bobCipher.init(Cipher.ENCRYPT_MODE, bobDesKey);
 
-        byte[] cleartext = convertToBytes(plaintext);
+        byte[] cleartext = plaintext.getBytes();
         byte[] ciphertext = bobCipher.doFinal(cleartext);
         // Retrieve the parameter that was used, and transfer it to Alice in
         // encoded format
