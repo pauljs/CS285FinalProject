@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -50,11 +51,14 @@ public class MainActivity extends Activity {
 		ll = (LinearLayout) findViewById(R.id.LinearLayout1);
 
 		list = (ListView) findViewById(R.id.listView1);
-		list.setOnItemClickListener(new OnItemClickListener() {
+		
+		// On long click start handshake
+		list.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
-			public void onItemClick(final AdapterView<?> parent,
-					final View view, final int position, final long id) {
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Log.i(LOG, "Item long click");
 				String info = adapter.getItem(position);
 				
 				final String[] t = info.split(":");
@@ -86,8 +90,35 @@ public class MainActivity extends Activity {
 				intent.putExtra("contactNumber", phoneNumber);
 				intent.putExtra("contactName", name);
 				startActivity(intent);
+				return false;
+			}
+			
+		});
+		
+		// On normal click, go to texting view
+		list.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(final AdapterView<?> parent,
+					final View view, final int position, final long id) {
+				Log.i(LOG, "Item short click");
+				
+				String info = adapter.getItem(position);
+				
+				final String[] t = info.split(":");
+				final String phoneNumber = t[1];
+				final String name = t[0];
+				
+				// Switch to texting view
+				final Intent intent = new Intent(MainActivity.this, TextingView.class);
+				intent.putExtra(PARENT, "test");
+				intent.putExtra("number", myPhoneNumber); 
+				intent.putExtra("contactNumber", phoneNumber);
+				intent.putExtra("contactName", name);
+				startActivity(intent);
 			}
 		});
+		
 		loadBtn = (Button) findViewById(R.id.button1);
 		loadBtn.setOnClickListener(new OnClickListener() {
 
@@ -98,11 +129,6 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-	}
-	
-	// Starts the new activity for the texting part of the app
-	public void onTextingView(View view) {
-
 	}
 
 	// STORAGE IS ONE STRING SEPARATING CONTACTS BY SEMICOLONS AND
