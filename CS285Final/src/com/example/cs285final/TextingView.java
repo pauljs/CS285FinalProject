@@ -129,6 +129,7 @@ public class TextingView extends Activity {
 				if(toAdd.charAt(0)=='\"'){
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 					try{
+						Log.d("TextingView", "Inside Try");
 						byte[] wholeMessage = convertToBytes(toAdd);
 						byte[] params = new byte[10];
 						byte[] cipherText = new byte[wholeMessage.length-10];
@@ -136,7 +137,9 @@ public class TextingView extends Activity {
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
+						Log.d("TextingView", "Decrypted");
 						toAdd = plaintext;
+						Log.d("TextingView", "plaintext:" + plaintext);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -157,6 +160,8 @@ public class TextingView extends Activity {
 				if(toAdd.charAt(0)=='\"'){
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 					try{
+
+						Log.d("TextingView", "Inside Try");
 						byte[] wholeMessage = convertToBytes(toAdd);
 						byte[] params = new byte[10];
 						byte[] cipherText = new byte[wholeMessage.length-10];
@@ -164,7 +169,9 @@ public class TextingView extends Activity {
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
+						Log.d("TextingView", "Decrypted");
 						toAdd = plaintext;
+						Log.d("TextingView", "plaintext:" + plaintext);
 					}catch(Exception e){
 						e.printStackTrace();
 					}

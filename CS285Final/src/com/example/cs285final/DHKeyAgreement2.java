@@ -250,7 +250,7 @@ public class DHKeyAgreement2 {
         Cipher aliceCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
         aliceCipher.init(Cipher.DECRYPT_MODE, aliceDesKey, params);
         byte[] recovered = aliceCipher.doFinal(ciphertext);
-        return Arrays.toString(recovered);
+        return new String(recovered);
     }
 
     /*
