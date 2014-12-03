@@ -167,7 +167,7 @@ public class DHKeyAgreement2 {
         return aliceKeyAgree;
     }
     
-    public DoubleBytes encrypt(String plaintext, KeyAgreement bobKeyAgree) throws Exception {
+    public DoubleBytes encrypt(String plaintext,  SecretKey bobDesKey) throws Exception {
     	/*
          * Now let's return the shared secret as a SecretKey object
          * and use it for encryption. First, we generate SecretKeys for the
@@ -201,14 +201,7 @@ public class DHKeyAgreement2 {
         // agreement object, so we call doPhase again prior to another
         // generateSecret call
         //bobKeyAgree.doPhase(alicePubKey, true); // not needed because done in handshake
-        
-        /*
-         //GET bobKeyAgree FROM CONTENT PROVIDER HERE
-         */
-        SecretKey bobDesKey = bobKeyAgree.generateSecret("DES");
-
-
-        
+                
         /*
          * Bob encrypts, using DES in CBC mode
          */
@@ -223,7 +216,7 @@ public class DHKeyAgreement2 {
         return new DoubleBytes(ciphertext, encodedParams);
     }
     
-    public String decrypt(byte[] ciphertext, byte[] encodedParams, KeyAgreement aliceKeyAgree) throws Exception {
+    public String decrypt(byte[] ciphertext, byte[] encodedParams, SecretKey aliceDesKey) throws Exception {
     	// Alice
         // NOTE: The call to aliceKeyAgree.generateSecret above reset the key
         // agreement object, so we call doPhase again prior to another
@@ -234,8 +227,6 @@ public class DHKeyAgreement2 {
          //GET bobKeyAgree FROM CONTENT PROVIDER HERE
     	 */
     	
-        SecretKey aliceDesKey = aliceKeyAgree.generateSecret("DES");
-        
         /*
          * Alice decrypts, using DES in CBC mode
          */

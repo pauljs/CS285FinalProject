@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentValues;
@@ -76,7 +79,16 @@ public class TextingView extends Activity {
 			}
 
 			private void EncryptAndSend(String message) {
-				getKey(contact);
+				try {
+					SecretKey secretKey = KeyProvider.getKey(contact, getApplicationContext());
+					DHKeyAgreement2 crypto = new DHKeyAgreement2();
+					DoubleBytes toSend = crypto.encrypt(message, secretKey);
+					byte[] c = new byte[toSend.getEncodedParams().length + toSend.getCiphertext().length];
+					System.arraycopy(toSend.getEncodedParams(), 0, c, 0, toSend.getEncodedParams().length);
+					System.arraycopy(toSend.getCiphertext(), 0, c, toSend.getEncodedParams().length, toSend.getCiphertext().length);
+					message = new String(c);
+				} catch (Exception e) {
+					}
 				message = "\"" + message + "\"";
 				SmsManager sms = SmsManager.getDefault();
 				sms.sendTextMessage(contact, myNumber, message, null, null);
@@ -86,32 +98,6 @@ public class TextingView extends Activity {
 		});
 	}
 
-	// TODO
-	public void addUserKeyInfo(String phoneNumber, String key) {
-		ContentValues values = new ContentValues();
-		values.put(KeyProvider.NUMBER, phoneNumber);
-		values.put(KeyProvider.KEY, key);
-		Uri uri = getContentResolver().insert(KeyProvider.CONTENT_URI, values);
-	}
-
-	// TODO
-	public String getKey(String number) {
-		String URL = "content://com.example.contentprovidertest.Keys/users";
-		Uri users = Uri.parse(URL);
-		Cursor c = getContentResolver()
-				.query(users, null, null, null, "number");
-		if (!c.moveToFirst()) {
-			return "";
-		} else {
-			do {
-				if (c.getString(c.getColumnIndex(KeyProvider.NUMBER))
-						.equalsIgnoreCase(number)) {
-					return c.getString(c.getColumnIndex(KeyProvider.KEY));
-				}
-			} while (c.moveToNext());
-			return "";
-		}
-	}
 	private void populatePastTexts() {
 		List<String> prevTexts = new ArrayList<String>();
 		prevTexts = getPrevTexts(contact);
@@ -131,20 +117,22 @@ public class TextingView extends Activity {
 		Cursor c = getContentResolver().query(
 				Uri.parse("content://sms/inbox"), null,
 				null, null, null);
-		/* while (c.moveToNext()) {
-		        for (int i = 0; i < c.getColumnCount(); i++) {
-		            Log.d(c.getColumnName(i) + "", i + " " + c.getString(i));
-		        }
-		        Log.d("One row finished",
-		                "**************************************************");
-		    }*/
 		
 		while (c.moveToNext()) {
 			if(c.getString(2).equals(number)){
 				String toAdd = c.getString(12);
 				if(toAdd.charAt(0)=='\"'){
-					// TODO DECRYPT
 					toAdd = toAdd.substring(1,toAdd.length()-1);
+					try{
+						byte[] wholeMessage = toAdd.getBytes();
+						byte[] params = new byte[18];
+						byte[] cipherText = new byte[wholeMessage.length-18];
+						System.arraycopy(wholeMessage, 0, params, 0, params.length);
+						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
+						DHKeyAgreement2 crypto = new DHKeyAgreement2();
+						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
+					} catch (Exception e) {
+					}
 				}
 				result.add(new Pair<String, Long>(number + ": " + toAdd,c.getLong(4)));
 				Log.d("TEXTVIEW", c.getString(12));
@@ -160,8 +148,17 @@ public class TextingView extends Activity {
 			if(d.getString(2).equals(number)){
 				String toAdd = d.getString(12);
 				if(toAdd.charAt(0)=='\"'){
-					//TODO DECRYPT
 					toAdd = toAdd.substring(1,toAdd.length()-1);
+					try{
+						byte[] wholeMessage = toAdd.getBytes();
+						byte[] params = new byte[18];
+						byte[] cipherText = new byte[wholeMessage.length-18];
+						System.arraycopy(wholeMessage, 0, params, 0, params.length);
+						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
+						DHKeyAgreement2 crypto = new DHKeyAgreement2();
+						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
+					}catch(Exception e){
+					}
 				}
 				result.add(new Pair<String, Long>(myNumber + ": " +toAdd,d.getLong(4)));
 				Log.d("TEXTVIEW", d.getString(12));
