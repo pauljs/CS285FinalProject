@@ -52,61 +52,7 @@ public class SMSReceiver extends BroadcastReceiver {
 				addUserKeyInfo(sender, new String(k.generateSecret("DES").toString()), context);
 			}
 		}
-		//To robust four U
 		catch (Exception e){}
-		
-		
-		/*
-		// need to create a for loop because if message is too long it will be
-		// broken up into a few messages
-		final SmsMessage[] messages = new SmsMessage[pdus.length];
-		final StringBuilder sb = new StringBuilder();
-
-		sb.append("\"");
-		for (int i = 0; i < pdus.length; i++) {
-			messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-			sb.append(messages[i].getMessageBody());
-		}
-		sb.append("\"");
-
-		final String sender = messages[0].getOriginatingAddress();
-		final String message = sb.toString();
-
-		Toast.makeText(context, "SMS Received : " + message, Toast.LENGTH_LONG)
-				.show();
-
-		final TelephonyManager tMgr = (TelephonyManager) context
-				.getSystemService(Context.TELEPHONY_SERVICE);
-		final String myPhoneNumber = tMgr.getLine1Number();
-		Log.i(TAG, "My Phone Number: " + myPhoneNumber);
-		Toast.makeText(context, "My Number: " + myPhoneNumber,
-				Toast.LENGTH_LONG).show();
-		//
-		// String myPhoneNumber = "4805771280";
-		// Toast.makeText(context, "My Number: " + myPhoneNumber,
-		// Toast.LENGTH_LONG).show();
-		//
-		*/
-		
-	/*  INFINTE LOOOP HERE
-		SmsManager sms = SmsManager.getDefault();
-		sms.sendTextMessage(myPhoneNumber, sender, message, null, null);
-*/
-		
-		
-		// Map<String, String> regMap = generateMap();
-		//
-		// Log.i(TAG, messages.getMessageBody());
-		// if(regMap.containsKey(sender)){
-		// String message = messages.getDisplayMessageBody();
-		// String tag = message.substring(0, 5);
-		// if(tag.equals("encry")){
-		// message = message.substring(5);
-		// String plainText = decrypt(message, sender, regMap.get(sender));
-		// sendInternal(message, sender);
-		// }
-		// sendInternal(message, sender);
-		// }
 	}
 
 
@@ -144,33 +90,5 @@ public class SMSReceiver extends BroadcastReceiver {
 	 *            : string of the phone number that initially sent sent it
 	 */
 	private void sendInternal(String message, String sender) {
-		// TODO Auto-generated method stub
-	}
-	
-	// TODO
-		public void addUserKeyInfo(String phoneNumber, String key, Context context) {
-			ContentValues values = new ContentValues();
-			values.put(KeyProvider.NUMBER, phoneNumber);
-			values.put(KeyProvider.KEY, key);
-			Uri uri = context.getContentResolver().insert(KeyProvider.CONTENT_URI, values);
-		}
-
-		// TODO
-		public String getKey(String number, Context context) {
-			String URL = "content://com.example.contentprovidertest.Keys/users";
-			Uri users = Uri.parse(URL);
-			Cursor c = context.getContentResolver()
-					.query(users, null, null, null, "number");
-			if (!c.moveToFirst()) {
-				return "";
-			} else {
-				do {
-					if (c.getString(c.getColumnIndex(KeyProvider.NUMBER))
-							.equalsIgnoreCase(number)) {
-						return c.getString(c.getColumnIndex(KeyProvider.KEY));
-					}
-				} while (c.moveToNext());
-				return "";
-			}
-		}
+	}	
 }

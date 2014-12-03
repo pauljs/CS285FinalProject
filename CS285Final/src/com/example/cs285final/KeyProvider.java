@@ -1,6 +1,16 @@
 package com.example.cs285final;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
+
+import javax.crypto.SecretKey;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -53,7 +63,7 @@ public class KeyProvider extends ContentProvider{
 			" CREATE TABLE " + TABLE_NAME +
 			" (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
 			" number TEXT NOT NULL, " +
-			" key TEXT NOT NULL);";
+			" key BLOB NOT NULL);";
 
 	// class that creates and manages the provider's database
 	private static class DBHelper extends SQLiteOpenHelper {
@@ -181,6 +191,74 @@ public class KeyProvider extends ContentProvider{
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
+	
+	/**
+	 * Places a private key in the keystore that the phonenumbers location
+	 * @param phoneNumber : phonenubmer of contact to store the secretKey with
+	 * @param key: SecretKey to  be stored
+	 * @param context : context of the application
+	 * @throws IOException
+	 */
+	public static void addUserKeyInfo(String phoneNumber, SecretKey key, Context context) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutput out = null;
+		try 
+		{
+			out = new ObjectOutputStream(bos);   
+			out.writeObject(key);
+			byte[] keyBytes = bos.toByteArray();
+		  
+			ContentValues values = new ContentValues();
+			values.put(KeyProvider.NUMBER, phoneNumber);
+			values.put(KeyProvider.KEY, keyBytes);
+			Uri uri = context.getContentResolver().insert(KeyProvider.CONTENT_URI, values);
+		} finally {
+		    if (out != null) 
+		    {
+		    	out.close();
+		    }
+		    bos.close();
+		}
+	}
+	
+	/**
+	 * Opposite of above method, accesses the CP and returns the PrivateKey stored there
+	 * @param number : number of the contact whose key you want.
+	 * @param context : context of application
+	 * @return : either the SecretKey associated with the number or null
+	 * @throws Exception
+	 */
+	public static SecretKey getKey(String number, Context context) throws Exception {
+		String URL = "content://com.example.contentprovidertest.Keys/users";
+		Uri users = Uri.parse(URL);
+		Cursor c = context.getContentResolver()
+				.query(users, null, null, null, "number");
+		if (!c.moveToFirst()) {
+			return null;
+		} else {
+			do {
+				if (c.getString(c.getColumnIndex(KeyProvider.NUMBER))
+						.equalsIgnoreCase(number)) {
+					byte[] keyBytes = c.getBlob(c.getColumnIndex(KeyProvider.KEY));
+					ByteArrayInputStream bis = new ByteArrayInputStream(keyBytes);
+					ObjectInput in = null;
+					try {
+					  in = new ObjectInputStream(bis);
+					  Object keyObject = in.readObject(); 
+					  return (SecretKey) keyObject;
+					}
+					finally {
+					    bis.close();
+					    if (in != null) {
+					      in.close();
+					    }
+					}
+				}
+			} while (c.moveToNext());
+			return null;
+		}
+	}
+
 		
 
 }
