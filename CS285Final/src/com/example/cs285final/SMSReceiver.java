@@ -42,16 +42,21 @@ public class SMSReceiver extends BroadcastReceiver {
 		Log.d("SMSRECIEVER", "Decoded: " + message);
 		DHKeyAgreement2 cryptographyHelper = new DHKeyAgreement2();
 		try{
+			Log.d("SMSRECIEVER", "entered try");
 			if(message.startsWith(MainActivity.RECIEVE_INITAL)){
+				Log.d("SMSRECIEVER", "started with:" + MainActivity.RECIEVE_INITAL);
 				Transfer t = cryptographyHelper.receiveInitialHandShakePart1(message.substring(4).getBytes());
 				KeyProvider.addUserKeyInfo(sender, t.getAliceKeyAgree().generateSecret("DES"), context);
 				byte[] toSend = cryptographyHelper.receiveInitialHandShakePart2(t.getAliceKpair());
 				SmsManager sms = SmsManager.getDefault();
 				sms.sendTextMessage(sender, myPhoneNumber, URLEncoder.encode(MainActivity.COMPLETE_HANDSHAKE + new String(toSend)), null, null);
 			} else if(message.startsWith(MainActivity.COMPLETE_HANDSHAKE)){
+				Log.d("SMSRECIEVER", "started with:" + MainActivity.COMPLETE_HANDSHAKE);
 				KeyAgreement k = cryptographyHelper.completeHandshake(message.substring(4).getBytes(), MainActivity.currentKeyAgreement);
 				KeyProvider.addUserKeyInfo(sender, k.generateSecret("DES"), context);
 			}
+			Log.d("SMSRECIEVER", "finished the if");
+			
 		}
 		catch (Exception e){}
 	}
