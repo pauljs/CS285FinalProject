@@ -227,8 +227,8 @@ public class DHKeyAgreement2 {
         // encoded format
         byte[] encodedParams = bobCipher.getParameters().getEncoded();
         return new DoubleBytes(ciphertext, encodedParams);
-    }
-    
+    } 
+     
     public String decrypt(byte[] ciphertext, byte[] encodedParams, SecretKey aliceDesKey) throws Exception {
     	// Alice
         // NOTE: The call to aliceKeyAgree.generateSecret above reset the key

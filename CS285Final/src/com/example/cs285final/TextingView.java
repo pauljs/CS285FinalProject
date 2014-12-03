@@ -130,14 +130,15 @@ public class TextingView extends Activity {
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 					try{
 						byte[] wholeMessage = convertToBytes(toAdd);
-						byte[] params = new byte[18];
-						byte[] cipherText = new byte[wholeMessage.length-18];
+						byte[] params = new byte[10];
+						byte[] cipherText = new byte[wholeMessage.length-10];
 						System.arraycopy(wholeMessage, 0, params, 0, params.length);
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
 						toAdd = plaintext;
 					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 				result.add(new Pair<String, Long>(number + ": " + toAdd,c.getLong(4)));
@@ -157,14 +158,15 @@ public class TextingView extends Activity {
 					toAdd = toAdd.substring(1,toAdd.length()-1);
 					try{
 						byte[] wholeMessage = convertToBytes(toAdd);
-						byte[] params = new byte[18];
-						byte[] cipherText = new byte[wholeMessage.length-18];
+						byte[] params = new byte[10];
+						byte[] cipherText = new byte[wholeMessage.length-10];
 						System.arraycopy(wholeMessage, 0, params, 0, params.length);
 						System.arraycopy(wholeMessage, params.length, cipherText, 0, cipherText.length);
 						DHKeyAgreement2 crypto = new DHKeyAgreement2();
 						String plaintext = crypto.decrypt(cipherText, params, KeyProvider.getKey(number, getApplicationContext()));
 						toAdd = plaintext;
 					}catch(Exception e){
+						e.printStackTrace();
 					}
 				}
 				result.add(new Pair<String, Long>(myNumber + ": " +toAdd,d.getLong(4)));
